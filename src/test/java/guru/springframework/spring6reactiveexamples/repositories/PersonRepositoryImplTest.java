@@ -4,6 +4,7 @@ import guru.springframework.spring6reactiveexamples.domain.Person;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +13,47 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PersonRepositoryImplTest {
     PersonRepository personRepository = new PersonRepositoryImpl();
+
+    @Test
+    void testGetByIdFound() {
+        // Inside a unit test it is ok to use block as it is convenient
+        Mono<Person> personMono = this.personRepository.getById(3);
+
+        assertTrue(personMono.hasElement().block());
+    }
+
+    @Test
+    void testGetByIdFoundStepVerifier() {
+        // Inside a unit test it is ok to use block as it is convenient
+        Mono<Person> personMono = this.personRepository.getById(3);
+
+        StepVerifier.create(personMono).expectNextCount(1).verifyComplete();
+
+        personMono.subscribe(person -> {
+            System.out.println(person.toString());
+        });
+    }
+
+    @Test
+    void testGetByIdNotFound() {
+        // Inside a unit test it is ok to use block
+        Mono<Person> personMono = this.personRepository.getById(6);
+
+        assertFalse(personMono.hasElement().block());
+    }
+
+    @Test
+    void testGetByIdNotFoundStepVerifier() {
+        // Inside a unit test it is ok to use block
+        Mono<Person> personMono = this.personRepository.getById(6);
+
+        StepVerifier.create(personMono).expectNextCount(0).verifyComplete();
+
+        personMono.subscribe(person -> {
+            System.out.println(person.toString());
+        });
+    }
+
     @Test
     void testMonoByIdBlock() {
         Mono<Person> personMono = this.personRepository.getById(1);
